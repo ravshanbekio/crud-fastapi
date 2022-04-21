@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, HTTPException, status
 from .schemas import CRUD
 from . import schemas, models
 from .database import engine, SessionLocal
@@ -16,8 +16,9 @@ def get_db():
         db.close()
 
 @app.get("/")
-async def home():
-    return "Hello World"
+async def home(db:Session=Depends(get_db)):
+    all_data = db.query(models.CRUD).all()
+    return all_data
 
 @app.post("/new/")
 async def new_data(request: schemas.CRUD, db:Session=Depends(get_db)):
@@ -26,3 +27,10 @@ async def new_data(request: schemas.CRUD, db:Session=Depends(get_db)):
     db.commit()
     db.refresh(new)
     return new
+
+@app.get("/{id}/")
+async def data_with_id(id,db:Session=Depends(get_db)):
+    data = db.query(models.CRUD).filter(models.CRUD.id == id).first()
+    if not data:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Data is not found")
+    return data
