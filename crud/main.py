@@ -34,3 +34,16 @@ async def data_with_id(id,db:Session=Depends(get_db)):
     if not data:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Data is not found")
     return data
+
+@app.put("/update/{id}", status_code=status.HTTP_202_ACCEPTED)
+async def update_data(id, request: schemas.CRUD, db:Session=Depends(get_db)):
+    data = db.query(models.CRUD).filter(models.CRUD.id == id)
+    data.update(request)
+    db.commit()
+    return "Data successfully updated"
+
+@app.delete("/delete/{id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_data(id, db:Session=Depends(get_db)):
+    data = db.query(models.CRUD).filter(models.CRUD.id == id).delete(synchronize_session=False)
+    db.commit()
+    return "Data deleted!"
