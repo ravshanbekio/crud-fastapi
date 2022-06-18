@@ -38,7 +38,7 @@ async def data_with_id(id,db:Session=Depends(get_db)):
 @app.put("/update/{id}", status_code=status.HTTP_202_ACCEPTED)
 async def update_data(id, request: schemas.CRUD, db:Session=Depends(get_db)):
     data = db.query(models.CRUD).filter(models.CRUD.id == id)
-    data.update(request)
+    data.update(title=request.title, text=request.text, date=request.date, author=request.author)
     db.commit()
     return "Data successfully updated"
 
